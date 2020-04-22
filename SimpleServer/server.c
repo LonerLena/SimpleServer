@@ -5,7 +5,35 @@
 #define PORT 1337
 #define BUFFER 4096
 
+/**
+ * Send message to client.
+ */
+int sendMessage(int conn, char msg) {
+	if(write(conn, msg, sizeof(msg)) != 0) {
+		return 1;
+	}
+	return 0;
+}
+
+/**
+ * Send message to all clients.
+ */
+int broadcast(int clients[], int index, char msg) {
+	for(int i = 0; i < index; i++) {
+		sendMessage(clients[i], msg);
+	}
+
+	return 0;
+}
+
+void receiveMessage() {
+	while(1) {
+	}
+}
+
 int main() {
+	int clients[256];
+	int clientsIndex = 0;
 	int s, conn, totalClients;
 	struct sockaddr_in client, server;
 	
@@ -34,6 +62,11 @@ int main() {
 		if(conn < 0) {
 			perror("accept");
 		}
-		printf("%d\n",conn);	
+		printf("User connected: %d!\n",conn);
+		int clientsLength = sizeof(clients)/sizeof(*clients);
+		clients[clientsIndex] = conn;
+		clientsIndex++;
 	}
+
+	return 0;
 }
