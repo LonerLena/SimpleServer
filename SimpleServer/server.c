@@ -40,7 +40,7 @@ int acceptConnection() {
 	return conn;
 }
 
-int * getClients() {
+int* getClients() {
 	return 0;
 }
 
@@ -84,7 +84,7 @@ int broadcast(int* clients, int index, char* msg) {
 }
 
 //TODO: Receive messages.
-char * receiveMessage() {
+char* receiveMessage() {
 	return("");
 }
 
