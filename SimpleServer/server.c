@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include "server.h"
 
 int s, conn;
 struct sockaddr_in server, client;
@@ -58,10 +59,15 @@ int kick() {
  * @param int conn, connection.
  * @param char msg, message.
  */
-int sendMessage(int conn, char msg) {
+int sendMessage(int conn, char* msg) {
 	if(write(conn, msg, sizeof(msg)) != 0) {
 		return 1;
 	}
+	return 0;
+}
+
+//TODO: Check if connection is still alive.
+int pingClient(int conn) {
 	return 0;
 }
 
@@ -70,7 +76,7 @@ int sendMessage(int conn, char msg) {
  * @param int index, total amount of clients.
  * @param char msg, message.
  */
-int broadcast(int clients[], int index, char msg) {
+int broadcast(int* clients, int index, char* msg) {
 	for(int i = 0; i < index; i++) {
 		sendMessage(clients[i], msg);
 	}
