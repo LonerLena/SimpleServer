@@ -4,7 +4,10 @@
 #include <netinet/in.h>
 #include "server.h"
 
-int s, conn;
+#define MAXCLIENTS 1024
+
+int s, conn, clients[MAXCLIENTS];
+int clientsIndex = 0;
 struct sockaddr_in server, client;
 
 /**
@@ -17,6 +20,12 @@ int start(int port) {
 	server.sin_family = AF_INET;
 	server.sin_addr.s_addr = htonl(INADDR_ANY);
 	server.sin_port = htons(port);
+
+	// Set all values to -1 in clients.
+	for(int i = 0; i < MAXCLIENTS; i++) {
+		clients[i] = -1;
+	}
+
 	if (bind(s, (struct sockaddr*)&server, sizeof(server)) != 0) {
 		perror("bind");
 		return(1);
@@ -37,20 +46,33 @@ int acceptConnection() {
 	if(conn < 0) {
 		return -1;
 	}
+	clients[clientsIndex] = conn;
+	while(clients[clientsIndex] != -1) {
+		clientsIndex = (clientsIndex+1)%MAXCLIENTS;
+	}
 	return conn;
 }
 
+/**
+ * Returns clients array.
+ * @return int clients[].
+ */
 int* getClients() {
-	return 0;
+	return clients;
 }
 
-//TODO: Ban an IP address.
-int ban() {
-	return 0;
-}
-
-//TODO: Kick a client.
-int kick() {
+/**
+ * Close an individual connection.
+ * @param int conn, client.
+ * @return int 0.
+ */
+int closeConnection(int conn) {
+	close(conn);
+	for(int i = 0; i < MAXCLIENTS; i++) {
+		if(clients[i] == conn) {
+			clients[i] = -1;
+		}
+	}
 	return 0;
 }
 
@@ -59,7 +81,7 @@ int kick() {
  * @param int conn, connection.
  * @param char msg, message.
  */
-int sendMessage(int conn, char* msg) {
+int send(int conn, char* msg) {
 	if(write(conn, msg, sizeof(msg)) != 0) {
 		return 1;
 	}
@@ -83,8 +105,7 @@ int broadcast(int* clients, int index, char* msg) {
 	return 0;
 }
 
-//TODO: Receive messages.
-char* receiveMessage() {
+//TODO: Receive.
+char* receive() {
 	return("");
 }
-
