@@ -8,6 +8,7 @@
 
 int s, conn, clients[MAXCLIENTS];
 int clientsIndex = 0;
+char* buffer;
 struct sockaddr_in server, client;
 
 /**
@@ -100,12 +101,35 @@ int pingClient(int conn) {
  */
 int broadcast(int* clients, int index, char* msg) {
 	for(int i = 0; i < index; i++) {
-		sendMessage(clients[i], msg);
+		if(clients[i] != -1) {
+			sendMessage(clients[i], msg);
+		}
 	}
 	return 0;
 }
 
-//TODO: Receive.
-char* receive() {
-	return("");
+/**
+ * Receive data from a single client.
+ * @param int conn, connection.
+ * @return char value.
+ */
+char* receive(int conn) {
+	buffer = malloc(65535);
+	int data = recv(conn, buffer, sizeof(buffer), 0);
+	if(data < 0) {
+		perror("recv");
+		return("\0");
+	} else if(data == 0) {
+		printf("server: Client disconnected.");
+		for(int i = 0; i < MAXCLIENTS; i++) {
+			if(clients[i] == conn) {
+				clients[i] == -1;
+			}
+		}
+		return("\0");
+	} else {
+		buffer[data] = "\0";
+		return(buffer);
+	}
+
 }
