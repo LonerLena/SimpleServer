@@ -109,7 +109,6 @@ int serverBroadcast(char* msg) {
 	for(int i = 0; i < MAXCLIENTS; i++) {
 		if(clients[i] != -1) {
 			serverSend(i, msg);
-			printf("[-] Client %d disconnected.\n",i);
 		}
 	}
 	return 0;
@@ -119,6 +118,7 @@ int serverCloseAll() {
 	for(int i = 0; i < MAXCLIENTS; i++) {
 		if(clients[i] != -1) {
 			close(clients[i]);
+			printf("[-] Client %d disconnected.\n",i);
 		}
 	}
 }
