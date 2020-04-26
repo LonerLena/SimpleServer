@@ -54,7 +54,7 @@ int serverAccept() {
 	}
 	clients[clientsIndex] = conn;
 	int oldClientsIndex = clientsIndex;
-	printf("[+] Client accepted with index:\n");
+	printf("[+] Client accepted with index: %d.\n",oldClientsIndex);
 	while(clients[clientsIndex] != -1) {
 		clientsIndex = (clientsIndex+1)%MAXCLIENTS;
 	}
@@ -77,7 +77,7 @@ int* serverClients() {
 int serverClose(int index) {
 	close(clients[index]);
 	clients[index] = -1;
-	printf("[-] Client disconnected.\n");
+	printf("[-] Client %d disconnected.\n",index);
 	return 0;
 }
 
@@ -87,10 +87,10 @@ int serverClose(int index) {
  * @param char msg, message.
  */
 int serverSend(int index, char* msg) {
-	if(write(clients[index], msg, sizeof(msg)) != 0) {
-		printf("[-] Client disconnected.\n");
+	if(write(clients[index], msg, sizeof(msg)) == -1) {
+		printf("[-] Client %d disconnected.\n",index);
 		clients[index] == -1;
-		return 1;
+		return -1;
 	}
 	return 0;
 }
@@ -109,9 +109,18 @@ int serverBroadcast(char* msg) {
 	for(int i = 0; i < MAXCLIENTS; i++) {
 		if(clients[i] != -1) {
 			serverSend(i, msg);
+			printf("[-] Client %d disconnected.\n",i);
 		}
 	}
 	return 0;
+}
+
+int serverCloseAll() {
+	for(int i = 0; i < MAXCLIENTS; i++) {
+		if(clients[i] != -1) {
+			close(clients[i]);
+		}
+	}
 }
 
 /**
@@ -126,7 +135,7 @@ char* serverReceive(int index) {
 		perror("recv");
 		return("\0");
 	} else if(data == 0) {
-		printf("[-] Client disconnected.\n");
+		printf("[-] Client %d disconnected.\n", index);
 		clients[index] == -1;
 		return("\0");
 	} else {
