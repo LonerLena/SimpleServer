@@ -5,6 +5,7 @@
 #include "server.h"
 
 #define MAXCLIENTS 1024
+#define BUFFERSIZE 4096
 
 int s, conn, clients[MAXCLIENTS];
 int clientsIndex = 0;
@@ -97,7 +98,7 @@ int serverSend(int index, char* msg) {
 }
 
 int serverPing(int index) {
-		if (recv(clients[index], buffer, sizeof(buffer), MSG_DONTWAIT) == 0) {
+		if (recv(clients[index], buffer, BUFFERSIZE, MSG_DONTWAIT) == 0) {
 			printf("[-] Client %d disconnected.\n",index);
 			close(clients[index]);
 			clients[index] = -1;
@@ -107,7 +108,7 @@ int serverPing(int index) {
 
 int serverPingAll() {
 	for(int i = 0; i < MAXCLIENTS; i++) {
-		if (recv(clients[i], buffer, sizeof(buffer), MSG_DONTWAIT) == 0) {
+		if (recv(clients[i], buffer, BUFFERSIZE, MSG_DONTWAIT) == 0) {
 			printf("[-] Client %d disconnected.\n",i);
 			close(clients[i]);
 			clients[i] = -1;
@@ -147,7 +148,7 @@ int serverCloseAll() {
  */
 char* serverReceive(int index) {
 	buffer = malloc(65535);
-	int data = recv(clients[index], buffer, sizeof(buffer),0);
+	int data = recv(clients[index], buffer, BUFFERSIZE,0);
 	if(data < 0) {
 		perror("recv");
 		return("\0");
@@ -168,7 +169,7 @@ char* serverReceiveAny() {
 	buffer = malloc(65535);
 	for(int i = 0; i < MAXCLIENTS; i++) {
 		if(clients[i] != -1) {
-			int data = recv(clients[i], buffer, sizeof(buffer), MSG_DONTWAIT);
+			int data = recv(clients[i], buffer, BUFFERSIZE, MSG_DONTWAIT);
 			if(data < 0) {
 			} else if(data == 0) {
 				printf("[-] Client %d disconnected.\n", i);
