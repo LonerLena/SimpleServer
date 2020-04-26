@@ -35,12 +35,13 @@ int start(int port) {
 		perror("listen");
 		return(2);
 	}
+	printf("[*] Started server.\n");
 	return(0);
 }
 
 /**
  * Accepts an incoming connection.
- * @return connection.
+ * @return index.
  */
 int acceptConnection() {
 	conn = accept(s, (struct sockaddr*)&client, sizeof(client));
@@ -48,10 +49,11 @@ int acceptConnection() {
 		return -1;
 	}
 	clients[clientsIndex] = conn;
+	int oldClientsIndex = clientsIndex;
 	while(clients[clientsIndex] != -1) {
 		clientsIndex = (clientsIndex+1)%MAXCLIENTS;
 	}
-	return conn;
+	return oldClientsIndex;
 }
 
 /**
@@ -64,26 +66,24 @@ int* getClients() {
 
 /**
  * Close an individual connection.
- * @param int conn, client.
+ * @param int index, client.
  * @return int 0.
  */
-int closeConnection(int conn) {
-	close(conn);
-	for(int i = 0; i < MAXCLIENTS; i++) {
-		if(clients[i] == conn) {
-			clients[i] = -1;
-		}
-	}
+int closeConnection(int index) {
+	close(clients[index]);
+	clients[index] = -1;
 	return 0;
 }
 
 /**
  * Send message to client.
- * @param int conn, connection.
+ * @param int index, connection.
  * @param char msg, message.
  */
-int send(int conn, char* msg) {
-	if(write(conn, msg, sizeof(msg)) != 0) {
+int send(int index, char* msg) {
+	if(write(clients[index], msg, sizeof(msg)) != 0) {
+		printf("[-] Client disconnected.\n");
+		clients[index] == -1;
 		return 1;
 	}
 	return 0;
@@ -99,10 +99,10 @@ int pingClient(int conn) {
  * @param int index, total amount of clients.
  * @param char msg, message.
  */
-int broadcast(int* clients, int index, char* msg) {
-	for(int i = 0; i < index; i++) {
+int broadcast(char* msg) {
+	for(int i = 0; i < MAXCLIENTS; i++) {
 		if(clients[i] != -1) {
-			sendMessage(clients[i], msg);
+			send(i, msg);
 		}
 	}
 	return 0;
@@ -110,22 +110,18 @@ int broadcast(int* clients, int index, char* msg) {
 
 /**
  * Receive data from a single client.
- * @param int conn, connection.
+ * @param int index, connection.
  * @return char value.
  */
-char* receive(int conn) {
+char* receive(int index) {
 	buffer = malloc(65535);
-	int data = recv(conn, buffer, sizeof(buffer), 0);
+	int data = recv(clients[index], buffer, sizeof(buffer), 0);
 	if(data < 0) {
 		perror("recv");
 		return("\0");
 	} else if(data == 0) {
-		printf("server: Client disconnected.");
-		for(int i = 0; i < MAXCLIENTS; i++) {
-			if(clients[i] == conn) {
-				clients[i] == -1;
-			}
-		}
+		printf("[-] Client disconnected.\n");
+		clients[index] == -1;
 		return("\0");
 	} else {
 		buffer[data] = "\0";
