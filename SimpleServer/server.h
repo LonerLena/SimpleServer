@@ -8,3 +8,4 @@ extern int serverStart(int);
 extern int serverPingAll();
 extern int serverPing(int);
 extern char * serverReceive(int);
+extern char * serverReceiveAny();

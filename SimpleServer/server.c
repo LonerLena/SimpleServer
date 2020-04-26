@@ -147,7 +147,7 @@ int serverCloseAll() {
  */
 char* serverReceive(int index) {
 	buffer = malloc(65535);
-	int data = recv(clients[index], buffer, sizeof(buffer), 0);
+	int data = recv(clients[index], buffer, sizeof(buffer),0);
 	if(data < 0) {
 		perror("recv");
 		return("\0");
@@ -157,8 +157,29 @@ char* serverReceive(int index) {
 		clients[index] = -1;
 		return("\0");
 	} else {
-		buffer[data] = "\0";
+		buffer[data] = 0;
+		buffer[data-1] = 0;
 		return(buffer);
 	}
 
+}
+
+char* serverReceiveAny() {
+	buffer = malloc(65535);
+	for(int i = 0; i < MAXCLIENTS; i++) {
+		if(clients[i] != -1) {
+			int data = recv(clients[i], buffer, sizeof(buffer), MSG_DONTWAIT);
+			if(data < 0) {
+			} else if(data == 0) {
+				printf("[-] Client %d disconnected.\n", i);
+				close(clients[i]);
+				clients[i] = -1;
+			} else {
+				buffer[data] = 0;
+				buffer[data-1] = 0;
+				return(buffer);
+			}
+		}
+	}
+	return("");
 }
