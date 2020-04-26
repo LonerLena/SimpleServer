@@ -90,7 +90,7 @@ int serverSend(int index, char* msg) {
 	if(write(clients[index], msg, sizeof(msg)) == -1) {
 		printf("[-] Client %d disconnected.\n",index);
 		close(clients[index]);
-		clients[index] == -1;
+		clients[index] = -1;
 		return -1;
 	}
 	return 0;
@@ -119,7 +119,7 @@ int serverCloseAll() {
 	for(int i = 0; i < MAXCLIENTS; i++) {
 		if(clients[i] != -1) {
 			close(clients[i]);
-			clients[i] == -1;
+			clients[i] = -1;
 			printf("[-] Client %d disconnected.\n",i);
 		}
 	}
@@ -138,7 +138,8 @@ char* serverReceive(int index) {
 		return("\0");
 	} else if(data == 0) {
 		printf("[-] Client %d disconnected.\n", index);
-		clients[index] == -1;
+		close(clients[index]);
+		clients[index] = -1;
 		return("\0");
 	} else {
 		buffer[data] = "\0";
