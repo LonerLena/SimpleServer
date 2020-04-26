@@ -96,8 +96,23 @@ int serverSend(int index, char* msg) {
 	return 0;
 }
 
-//TODO: Check if connection is still alive.
-int serverPing(int conn) {
+int serverPing(int index) {
+		if (recv(clients[index], buffer, sizeof(buffer), MSG_DONTWAIT) == 0) {
+			printf("[-] Client %d disconnected.\n",index);
+			close(clients[index]);
+			clients[index] = -1;
+		}
+	return 0;
+}
+
+int serverPingAll() {
+	for(int i = 0; i < MAXCLIENTS; i++) {
+		if (recv(clients[i], buffer, sizeof(buffer), MSG_DONTWAIT) == 0) {
+			printf("[-] Client %d disconnected.\n",i);
+			close(clients[i]);
+			clients[i] = -1;
+		}
+	}
 	return 0;
 }
 
