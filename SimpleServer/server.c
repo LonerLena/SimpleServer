@@ -30,10 +30,12 @@ int serverStart(int port) {
 	if (bind(s, (struct sockaddr*)&server, sizeof(server)) != 0) {
 		perror("bind");
 		return(1);
+		exit(1);
 	}
 	if(listen(s, 6) != 0) {
 		perror("listen");
 		return(2);
+		exit(2);
 	}
 	printf("[*] Started server.\n");
 	return(0);
@@ -44,12 +46,15 @@ int serverStart(int port) {
  * @return index.
  */
 int serverAccept() {
-	conn = accept(s, (struct sockaddr*)&client, sizeof(client));
+	int sizeOfClient = sizeof(client);
+	conn = accept(s, (struct sockaddr*)&client, &sizeOfClient);
 	if(conn < 0) {
+		perror("accept");
 		return -1;
 	}
 	clients[clientsIndex] = conn;
 	int oldClientsIndex = clientsIndex;
+	printf("[+] Client accepted with index:\n");
 	while(clients[clientsIndex] != -1) {
 		clientsIndex = (clientsIndex+1)%MAXCLIENTS;
 	}
@@ -72,6 +77,7 @@ int* serverClients() {
 int serverClose(int index) {
 	close(clients[index]);
 	clients[index] = -1;
+	printf("[-] Client disconnected.\n");
 	return 0;
 }
 
