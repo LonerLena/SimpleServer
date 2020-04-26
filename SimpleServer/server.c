@@ -16,7 +16,7 @@ struct sockaddr_in server, client;
  * @param int port, port for server to run on.
  * @return int 0 on success.
  */
-int start(int port) {
+int serverStart(int port) {
 	s = socket(AF_INET, SOCK_STREAM, 0);
 	server.sin_family = AF_INET;
 	server.sin_addr.s_addr = htonl(INADDR_ANY);
@@ -43,7 +43,7 @@ int start(int port) {
  * Accepts an incoming connection.
  * @return index.
  */
-int acceptConnection() {
+int serverAccept() {
 	conn = accept(s, (struct sockaddr*)&client, sizeof(client));
 	if(conn < 0) {
 		return -1;
@@ -60,7 +60,7 @@ int acceptConnection() {
  * Returns clients array.
  * @return int clients[].
  */
-int* getClients() {
+int* serverClients() {
 	return clients;
 }
 
@@ -69,7 +69,7 @@ int* getClients() {
  * @param int index, client.
  * @return int 0.
  */
-int closeConnection(int index) {
+int serverClose(int index) {
 	close(clients[index]);
 	clients[index] = -1;
 	return 0;
@@ -80,7 +80,7 @@ int closeConnection(int index) {
  * @param int index, connection.
  * @param char msg, message.
  */
-int send(int index, char* msg) {
+int serverSend(int index, char* msg) {
 	if(write(clients[index], msg, sizeof(msg)) != 0) {
 		printf("[-] Client disconnected.\n");
 		clients[index] == -1;
@@ -90,7 +90,7 @@ int send(int index, char* msg) {
 }
 
 //TODO: Check if connection is still alive.
-int pingClient(int conn) {
+int serverPing(int conn) {
 	return 0;
 }
 
@@ -99,10 +99,10 @@ int pingClient(int conn) {
  * @param int index, total amount of clients.
  * @param char msg, message.
  */
-int broadcast(char* msg) {
+int serverBroadcast(char* msg) {
 	for(int i = 0; i < MAXCLIENTS; i++) {
 		if(clients[i] != -1) {
-			send(i, msg);
+			serverSend(i, msg);
 		}
 	}
 	return 0;
@@ -113,7 +113,7 @@ int broadcast(char* msg) {
  * @param int index, connection.
  * @return char value.
  */
-char* receive(int index) {
+char* serverReceive(int index) {
 	buffer = malloc(65535);
 	int data = recv(clients[index], buffer, sizeof(buffer), 0);
 	if(data < 0) {
