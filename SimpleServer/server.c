@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <arpa/inet.h>
 #include "server.h"
 
 #define MAXCLIENTS 1024
@@ -68,6 +69,24 @@ int serverAccept() {
  */
 int* serverClients() {
 	return clients;
+}
+
+/**
+ * Returns IP address of peer.
+ * @param int index, client.
+ * @return char[]. IP address.
+ */
+char* serverGetClientAddress(int index) {
+	struct sockaddr_in addr;
+	socklen_t sizeOfAddr = sizeof(addr);
+    char address[32];
+	if(getpeername(clients[index], (struct sockaddr*)&addr, &sizeOfAddr) == 0) {
+		printf("%s\n",inet_ntoa(addr.sin_addr));
+	} else {
+		perror("getpeername");
+		return("\0");
+	}
+	return(inet_ntoa(addr.sin_addr));
 }
 
 /**

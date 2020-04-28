@@ -3,6 +3,7 @@ extern int serverBroadcast(char*);
 extern int * serverClients();
 extern int serverCloseAll();
 extern int serverClose(int);
+extern char * serverGetClientAddress(int);
 extern int serverSend(int, char*);
 extern int serverStart(int);
 extern int serverPingAll();
