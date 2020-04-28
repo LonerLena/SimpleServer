@@ -147,7 +147,7 @@ int serverCloseAll() {
  * @return char value.
  */
 char* serverReceive(int index) {
-	buffer = malloc(65535);
+	buffer = malloc(BUFFERSIZE);
 	int data = recv(clients[index], buffer, BUFFERSIZE,0);
 	if(data < 0) {
 		perror("recv");
@@ -166,7 +166,7 @@ char* serverReceive(int index) {
 }
 
 char* serverReceiveAny() {
-	buffer = malloc(65535);
+	buffer = malloc(BUFFERSIZE);
 	for(int i = 0; i < MAXCLIENTS; i++) {
 		if(clients[i] != -1) {
 			int data = recv(clients[i], buffer, BUFFERSIZE, MSG_DONTWAIT);
