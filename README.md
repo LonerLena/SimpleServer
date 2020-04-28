@@ -9,7 +9,11 @@ Include the server header file, and compile your project with the server file in
 
 ## Usage
 Start server: `serverStart(PORT);`
+
 Accept client: `serverAccept();`
+
 Close client connection: `serverClose(CLIENT);`
+
 Send message to client: `serverSend(CLIENT, MESSAGE);`
+
 etc.
