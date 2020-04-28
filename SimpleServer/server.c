@@ -97,21 +97,26 @@ int serverSend(int index, char* msg) {
 	return 0;
 }
 
+/**
+ * Check if connection is still alive. Closes connection with client if not alive.
+ * @param int index, connection
+ * @return int 0, success.
+ */
 int serverPing(int index) {
-		if (recv(clients[index], buffer, BUFFERSIZE, MSG_DONTWAIT) == 0) {
-			printf("[-] Client %d disconnected.\n",index);
-			close(clients[index]);
-			clients[index] = -1;
+		if (recv(clients[index], buffer, BUFFERSIZE, MSG_PEEK | MSG_DONTWAIT) == 0) {
+			serverClose(index);
 		}
 	return 0;
 }
 
+/**
+ * Check if connection is still alive of all clients. Disconnects client if connection is not alive.
+ * @return int 0, success.
+ */
 int serverPingAll() {
 	for(int i = 0; i < MAXCLIENTS; i++) {
-		if (recv(clients[i], buffer, BUFFERSIZE, MSG_DONTWAIT) == 0) {
-			printf("[-] Client %d disconnected.\n",i);
-			close(clients[i]);
-			clients[i] = -1;
+		if (recv(clients[i], buffer, BUFFERSIZE, MSG_PEEK | MSG_DONTWAIT) == 0) {
+			serverClose(i);
 		}
 	}
 	return 0;
@@ -119,7 +124,6 @@ int serverPingAll() {
 
 /**
  * Send message to all clients.
- * @param int index, total amount of clients.
  * @param char msg, message.
  */
 int serverBroadcast(char* msg) {
@@ -130,15 +134,17 @@ int serverBroadcast(char* msg) {
 	}
 	return 0;
 }
-
+/**
+ * Close all connections.
+ * @return int 0, success.
+ */
 int serverCloseAll() {
 	for(int i = 0; i < MAXCLIENTS; i++) {
 		if(clients[i] != -1) {
-			close(clients[i]);
-			clients[i] = -1;
-			printf("[-] Client %d disconnected.\n",i);
+			serverClose(i);
 		}
 	}
+	return(0);
 }
 
 /**
@@ -153,9 +159,7 @@ char* serverReceive(int index) {
 		perror("recv");
 		return("\0");
 	} else if(data == 0) {
-		printf("[-] Client %d disconnected.\n", index);
-		close(clients[index]);
-		clients[index] = -1;
+		serverClose(index);
 		return("\0");
 	} else {
 		buffer[data] = 0;
@@ -165,6 +169,10 @@ char* serverReceive(int index) {
 
 }
 
+/**
+ * Receive message from any client.
+ * @deprecated, not ready.
+ */
 char* serverReceiveAny() {
 	buffer = malloc(BUFFERSIZE);
 	for(int i = 0; i < MAXCLIENTS; i++) {
@@ -172,9 +180,7 @@ char* serverReceiveAny() {
 			int data = recv(clients[i], buffer, BUFFERSIZE, MSG_DONTWAIT);
 			if(data < 0) {
 			} else if(data == 0) {
-				printf("[-] Client %d disconnected.\n", i);
-				close(clients[i]);
-				clients[i] = -1;
+				serverClose(i);
 			} else {
 				buffer[data] = 0;
 				buffer[data-1] = 0;
