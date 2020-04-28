@@ -33,7 +33,7 @@ int serverStart(int port) {
 		return(1);
 		exit(1);
 	}
-	if(listen(s, 6) != 0) {
+	if(listen(s, 8) != 0) {
 		perror("listen");
 		return(2);
 		exit(2);
