@@ -1,4 +1,7 @@
 extern int serverAccept();
+extern int serverBanAddress(char*);
+extern int serverBanCheckClient(int);
+extern int serverBanClient(int);
 extern int serverBroadcast(char*);
 extern int * serverClients();
 extern int serverCloseAll();

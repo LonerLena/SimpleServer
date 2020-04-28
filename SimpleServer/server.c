@@ -3,6 +3,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <string.h>
 #include "server.h"
 
 #define MAXCLIENTS 1024
@@ -11,6 +12,8 @@
 int s, conn, clients[MAXCLIENTS];
 int clientsIndex = 0;
 char* buffer;
+char bannedAddresses[MAXCLIENTS][32];
+int bannedAddressIndex = 0;
 struct sockaddr_in server, client;
 
 /**
@@ -24,7 +27,7 @@ int serverStart(int port) {
 	server.sin_addr.s_addr = htonl(INADDR_ANY);
 	server.sin_port = htons(port);
 
-	// Set all values to -1 in clients.
+	// Set all values to -1 in clients[].
 	for(int i = 0; i < MAXCLIENTS; i++) {
 		clients[i] = -1;
 	}
@@ -57,6 +60,11 @@ int serverAccept() {
 	clients[clientsIndex] = conn;
 	int oldClientsIndex = clientsIndex;
 	printf("[+] Client accepted with index: %d.\n",oldClientsIndex);
+	if(serverBanCheckClient(oldClientsIndex) == 1) {
+		printf("[!] A client from a banned IP address connected and will be removed.\n");
+		serverClose(oldClientsIndex);
+		return(-1);
+	}
 	while(clients[clientsIndex] != -1) {
 		clientsIndex = (clientsIndex+1)%MAXCLIENTS;
 	}
@@ -79,14 +87,40 @@ int* serverClients() {
 char* serverGetClientAddress(int index) {
 	struct sockaddr_in addr;
 	socklen_t sizeOfAddr = sizeof(addr);
-    char address[32];
 	if(getpeername(clients[index], (struct sockaddr*)&addr, &sizeOfAddr) == 0) {
-		printf("%s\n",inet_ntoa(addr.sin_addr));
+		return(inet_ntoa(addr.sin_addr));
 	} else {
 		perror("getpeername");
 		return("\0");
 	}
-	return(inet_ntoa(addr.sin_addr));
+}
+
+int serverBanAddress(char* address) {
+	strcpy(bannedAddresses[bannedAddressIndex], address);
+	bannedAddressIndex = (bannedAddressIndex+1)%MAXCLIENTS;
+	printf("[*] Banned address %s!\n",address);
+	return(0);
+}
+
+int serverBanClient(int index) {
+	char* address = serverGetClientAddress(index);
+	if(address[0] != 0) {
+		strcpy(bannedAddresses[bannedAddressIndex], address);
+		bannedAddressIndex = (bannedAddressIndex+1)%MAXCLIENTS;
+		printf("[*] Banned address %s!\n",address);
+	} else {
+		return(-1);
+	}
+	return(0);
+}
+
+int serverBanCheckClient(int index) {
+	for(int i = 0; i < MAXCLIENTS; i++) {
+		if(strcmp(bannedAddresses[i], serverGetClientAddress(index)) == 0) {
+			return 1;
+		}
+	}
+	return 0;
 }
 
 /**
