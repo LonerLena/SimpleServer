@@ -13,3 +13,4 @@ extern int serverPingAll();
 extern int serverPing(int);
 extern char * serverReceive(int);
 extern char * serverReceiveAny();
+extern int serverUnbanAddress(char*);

@@ -123,6 +123,16 @@ int serverBanCheckClient(int index) {
 	return 0;
 }
 
+int serverUnbanAddress(char* address) {
+	for(int i = 0; i < MAXCLIENTS; i++) {
+		if(strcmp(bannedAddresses[i],address) == 0) {
+			strcpy(bannedAddresses[i], "\0");
+			return 0;
+		} 
+	}
+	return -1;
+}
+
 /**
  * Close an individual connection.
  * @param int index, client.
