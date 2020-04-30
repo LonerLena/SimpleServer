@@ -105,9 +105,7 @@ int serverBanAddress(char* address) {
 int serverBanClient(int index) {
 	char* address = serverGetClientAddress(index);
 	if(address[0] != 0) {
-		strcpy(bannedAddresses[bannedAddressIndex], address);
-		bannedAddressIndex = (bannedAddressIndex+1)%MAXCLIENTS;
-		printf("[*] Banned address %s!\n",address);
+		serverBanAddress(address);
 	} else {
 		return(-1);
 	}
@@ -178,9 +176,7 @@ int serverPing(int index) {
  */
 int serverPingAll() {
 	for(int i = 0; i < MAXCLIENTS; i++) {
-		if (recv(clients[i], buffer, BUFFERSIZE, MSG_PEEK | MSG_DONTWAIT) == 0) {
-			serverClose(i);
-		}
+			serverPing(i);
 	}
 	return 0;
 }
