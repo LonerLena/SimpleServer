@@ -149,7 +149,6 @@ int serverClose(int index) {
  * @param char msg, message.
  */
 int serverSend(int index, char* msg, int sizeOfMsg) {
-	printf("%s",msg);
 	if(write(clients[index], msg, sizeOfMsg) == -1) {
 		printf("[-] Client %d disconnected.\n",index);
 		close(clients[index]);
