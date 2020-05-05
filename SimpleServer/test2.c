@@ -28,8 +28,8 @@ int main() {
 	printf("%s\n",receive);
 
 	// Response to client (html content)
-	// ! Currently not working
-	serverSend(newclient, "HTTP/1.1 200 OK\r\n\r\n<h1>Response!</h1>");
+	char msg[] = "HTTP/1.1 200 OK\r\n\r\n<h1>Response!</h1>\n\0";
+	serverSend(newclient, msg, sizeof(msg));
 
     serverCloseAll();
 }
