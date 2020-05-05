@@ -148,8 +148,9 @@ int serverClose(int index) {
  * @param int index, connection.
  * @param char msg, message.
  */
-int serverSend(int index, char* msg) {
-	if(write(clients[index], msg, sizeof(msg)) == -1) {
+int serverSend(int index, char* msg, int sizeOfMsg) {
+	printf("%s",msg);
+	if(write(clients[index], msg, sizeOfMsg) == -1) {
 		printf("[-] Client %d disconnected.\n",index);
 		close(clients[index]);
 		clients[index] = -1;
@@ -185,10 +186,10 @@ int serverPingAll() {
  * Send message to all clients.
  * @param char msg, message.
  */
-int serverBroadcast(char* msg) {
+int serverBroadcast(char* msg, int sizeOfMsg) {
 	for(int i = 0; i < MAXCLIENTS; i++) {
 		if(clients[i] != -1) {
-			serverSend(i, msg);
+			serverSend(i, msg, sizeOfMsg);
 		}
 	}
 	return 0;
